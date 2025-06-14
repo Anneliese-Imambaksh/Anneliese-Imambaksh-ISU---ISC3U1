@@ -1,0 +1,297 @@
+//Anneliese Imambaksh
+import java.util.Scanner;
+import java.util.ArrayList;
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int option = 0;
+        ArrayList<String> categories = new ArrayList<>();
+        ArrayList<String> services = new ArrayList<>();
+        ArrayList<Double> hourlyRate = new ArrayList<>();
+        ArrayList<String> categoryDisplay = new ArrayList<>();
+        ArrayList<String> availability = new ArrayList<>();
+        ArrayList<String> selections = new ArrayList<>();
+        ArrayList<Double> selectionPrices = new ArrayList<>();
+        ArrayList<String> cartItems = new ArrayList<>();
+        ArrayList<Double> cartPrices = new ArrayList<>();
+        double cartTotal = 0;
+
+
+        System.out.println("Welcome to your Local Service Marketplace!"); 
+
+
+        while (option != 4) { //user is presented with options to select an action as long as they don't choose to exit which is option 4
+            System.out.println("Please choose one of the following options:\n[1] Add a service\n[2] Book a service\n[3] Check Cart\n[4] Exit");  
+                option = sc.nextInt();
+                sc.nextLine(); // Clear buffer
+            switch (option) {
+                case 1: //adding a service: setting hourly rate, availability, category and service name
+                    String addAnother = "yes";
+                    while (addAnother.equalsIgnoreCase("yes")) {
+                        System.out.println("Enter the category of your service (e.g., plumbing, cleaning, tutoring):");
+                        String category = sc.nextLine().trim();
+                        if (category.length() == 0) {
+                            System.out.println("Category cannot be empty.");
+                        }
+                        categories.add(category);
+                        System.out.println("Enter Service Name:");
+                        String service = sc.nextLine().trim();
+                        if (service.length() == 0) {
+                            System.out.println("Service name cannot be empty.");
+                        }
+                        services.add(service);
+                        System.out.println("Enter Hourly Rate (e.g., 40.50, 125, 15):");
+                        double rate = sc.nextDouble();
+                        if (rate < 0) {
+                            System.out.println("Hourly rate cannot be negative.");
+                        }
+                        hourlyRate.add(rate);
+                        sc.nextLine();
+                        System.out.println("You have successfully added a service.");
+                        availability.add("Available");
+                        if (!categoryDisplay.contains(category.toLowerCase())) {
+                            categoryDisplay.add(category.toLowerCase());
+                        }
+                        System.out.println("Would you like to add another service? (yes/no)");
+                        addAnother = sc.nextLine().trim();
+                    }
+                    break;
+
+                case 2: //booking a service: displaying categories and services for the user to select until there are no more categories to choose from or they choose to exit from the main menu
+                    if (categories.size() == 0) {
+                        System.out.println("No categories available.");
+                        break;
+                    }
+                    System.out.println("List of Service Categories:");
+                    for (String cat : categoryDisplay) {
+                        System.out.println("- " + cat);
+                    }
+                    System.out.println("Select Category (please type out the option):");
+                    String categorySelection = sc.nextLine().trim().toLowerCase();
+                    if (!categoryDisplay.contains(categorySelection)) {
+                        System.out.println("Invalid category option.");
+                        break;
+                    }
+                    while (!(selections.size() == 0)) {
+                        int i = 0;
+                        selections.remove(i);
+                    }
+                    while (!(selectionPrices.size() == 0)){
+                        int i = 0;
+                        selectionPrices.remove(i);
+                    }
+                    System.out.println("List of Services:");
+                    int serviceNum = 1;
+                    for (int i = 0; i < categories.size(); i++) { // displays the services within the selected category and their hourly rates and availability
+                        if (categories.get(i).toLowerCase().equals(categorySelection)) {
+                            System.out.println("[" + serviceNum + "] " + services.get(i) +
+                                    "\nHourly Rate: $" + hourlyRate.get(i) +
+                                    "\nAvailability: " + availability.get(i));
+                            selections.add(services.get(i));
+                            selectionPrices.add(hourlyRate.get(i));
+                            serviceNum++;
+                        }
+                    }
+                    if (selections.size()==0) {
+                        System.out.println("No services available in this category.");
+                        break;
+                    }
+                    System.out.println("Select a service (please enter the number):");
+                        int serviceSelect = sc.nextInt();
+                        sc.nextLine(); // Clear buffer
+                        if (serviceSelect < 1 || serviceSelect > selections.size()) {
+                            System.out.println("Invalid service number.");
+                            break;
+                        }
+                        int serviceIndex = -1;
+                        for (int i = 0; i < services.size(); i++) { //searches the service list for the service the user inputted and records the index
+                            if (services.get(i).equals(selections.get(serviceSelect - 1)) &&
+                                    categories.get(i).toLowerCase().equals(categorySelection)) {
+                                serviceIndex = i;
+                                break;
+                            }
+                        }
+                        if (serviceIndex != -1 && availability.get(serviceIndex).equals("Available")) { //updating cart by adding the new item and it's price, and updating availability
+                            cartItems.add(selections.get(serviceSelect - 1));
+                            cartPrices.add(selectionPrices.get(serviceSelect - 1));
+                            availability.set(serviceIndex, "Fully Booked");
+                            System.out.println("Service added to cart.");
+                            cartTotal = 0;
+                            System.out.println("Your cart has:");
+                            for (int p = 0; p < cartItems.size(); p++) {
+                                System.out.println(cartItems.get(p) + " : $" + cartPrices.get(p));
+                                cartTotal += cartPrices.get(p); //sum of current cart
+                            }
+                            System.out.println("Your total is: $" + cartTotal);
+                        } else {
+                            System.out.println("Error, service is booked or unavailable.");
+                        }
+                    break;
+
+                case 3: //checking cart: the user can view their current cart and update and remove items as long as the cart is not empty
+                    cartTotal = 0;
+                    System.out.println("Current Cart Services:");
+                    if (cartItems.size()==0) {
+                        System.out.println("Cart is empty.");
+                    } else {
+                        for (int i = 0; i < cartItems.size(); i++) {
+                            cartTotal += cartPrices.get(i);
+                            System.out.println("[" + (i + 1) + "] " + cartItems.get(i) + ": $" + cartPrices.get(i)); 
+                        }
+                        System.out.println("Your current cart total is: $" + cartTotal);
+                    }
+                    System.out.println("Cart Menu Options:\n[1] Update a service\n[2] Remove a service\n[3] Checkout\n[4] Back to main menu");
+                        int cartChoice = sc.nextInt();
+                        sc.nextLine(); // Clear buffer
+                        if (cartChoice == 1) {
+                            if (cartItems.size() == 0) {
+                                System.out.println("Cart is empty, nothing to update.");
+                                break;
+                            }
+                            System.out.println("Which service would you like to update? (enter number):");
+                            int updateIndex = sc.nextInt();
+                            sc.nextLine();
+                            if (updateIndex < 1 || updateIndex > cartItems.size()) {
+                                System.out.println("Invalid cart item number.");
+                                break;
+                            }
+                            String oldService = cartItems.get(updateIndex - 1);
+                            for (int i = 0; i < services.size(); i++) { //updating availability of selected service
+                                if (services.get(i).equals(oldService)) {
+                                    availability.set(i, "Available");
+                                    break;
+                                }
+                            }
+                            System.out.println("Select new Category:");
+                            for (int i = 0; i < categoryDisplay.size(); i++) { 
+                                System.out.println("[" + (i + 1) + "] " + categoryDisplay.get(i));
+                            }
+                            String newCategory = sc.nextLine().trim().toLowerCase();
+                            if (!categoryDisplay.contains(newCategory)) {
+                                System.out.println("Invalid category selection.");
+                                break;
+                            }
+                            while (!(selections.size() == 0)) { //resetting selections to none
+                                int i = 0;
+                                selections.remove(i);
+                            }
+                            while (!(selectionPrices.size() == 0)) {
+                                int i = 0;
+                                selectionPrices.remove(i);
+                            }
+                            int newServiceNum = 1;
+                            for (int j = 0; j < categories.size(); j++) {
+                                if (categories.get(j).toLowerCase().equals(newCategory)) {
+                                    System.out.println("[" + newServiceNum + "] " + services.get(j) +
+                                            "\nHourly Rate: $" + hourlyRate.get(j) +
+                                            "\nAvailability: " + availability.get(j));
+                                    selections.add(services.get(j));
+                                    selectionPrices.add(hourlyRate.get(j));
+                                    newServiceNum++;
+                                }
+                            }
+                            if (selections.size() == 0) {
+                                System.out.println("No services available in this category.");
+                                break;
+                            }
+                            System.out.println("Select new service (enter number):");
+                            int newServiceSelect = sc.nextInt();
+                            sc.nextLine();
+                            if (newServiceSelect < 1 || newServiceSelect > selections.size()) {
+                                System.out.println("Invalid service selection.");
+                                break;
+                            }
+                            serviceIndex = -1;
+                            for (int k = 0; k < services.size(); k++) {
+                                if (services.get(k).equals(selections.get(newServiceSelect - 1)) &&
+                                        categories.get(k).toLowerCase().equals(newCategory)) {
+                                    serviceIndex = k;
+                                    break;
+                                }
+                            }
+                            if (serviceIndex != -1 && availability.get(serviceIndex).equals("Available")) { //confirming selected service is available and booking it, and updating availability
+                                cartItems.set(updateIndex - 1, selections.get(newServiceSelect - 1));
+                                cartPrices.set(updateIndex - 1, selectionPrices.get(newServiceSelect - 1));
+                                availability.set(serviceIndex, "Fully Booked");
+                                System.out.println("Service updated successfully.");
+                            } else {
+                                System.out.println("Error: Selected service is not available.");
+                            }
+                        } else if (cartChoice == 2) { //removing service from cart
+                            if (cartItems.size()==0) {
+                                System.out.println("Cart is empty, nothing to remove.");
+                                break;
+                            }
+                            System.out.println("Which service would you like to remove? (enter number):");
+                            int removeIndex = sc.nextInt();
+                            sc.nextLine();
+                            if (removeIndex < 1 || removeIndex <= cartItems.size()) {
+                                String removedService = cartItems.get(removeIndex - 1);
+                                for (int i = 0; i < services.size(); i++) {
+                                    if (services.get(i).equals(removedService)) {
+                                        availability.set(i, "Available");
+                                        break;
+                                    }
+                                }
+                                cartItems.remove(removeIndex - 1);
+                                cartPrices.remove(removeIndex - 1);
+                                System.out.println("Service removed successfully.");
+                            } else {
+                                System.out.println("Invalid cart item number.");
+                            }
+                            cartTotal = 0;
+                            System.out.println("Updated Cart:");
+                            if (cartItems.size() == 0) {
+                                System.out.println("Cart is empty.");
+                            } else {
+                                for (int i = 0; i < cartItems.size(); i++) {
+                                    cartTotal += cartPrices.get(i);
+                                    System.out.println("[" + (i + 1) + "] " + cartItems.get(i) + ": $" + cartPrices.get(i));
+                                }
+                            }
+                        } else if (cartChoice == 3) {//checking out current cart
+                            if (cartItems.size() == 0) {
+                                System.out.println("Cart is empty, nothing to checkout.");
+                                break;
+                            }
+                            System.out.println("Your cart total is: $" + cartTotal);
+                            System.out.println("Would you like to checkout? (yes/no)");
+                            String checkoutChoice = sc.nextLine().trim();
+                            if (checkoutChoice.equalsIgnoreCase("yes")) {
+                                System.out.println("Invoice:");
+                                System.out.println("-------------------------");
+                                for (int i = 0; i < cartItems.size(); i++) {
+                                    System.out.println("[" + (i + 1) + "] " + cartItems.get(i) + ": $" + cartPrices.get(i));
+                                }
+                                System.out.println("-------------------------");
+                                System.out.println("Total: $" + cartTotal);
+                                System.out.println("Order is confirmed - Confirmation Number: " + (int) (Math.random() * 10000)); //generating a random number for a confirmation number
+                                System.out.println("Thank you.");
+                                while (!(cartItems.size() == 0)) { //resetting cart
+                                    int i = 0;
+                                    cartItems.remove(i);
+                                }
+                                while (!(cartPrices.size() == 0)) {
+                                    int i = 0;
+                                    cartPrices.remove(i);
+                                }
+                                cartTotal = 0;
+                            }
+                        }
+
+                    break;
+
+
+                case 4: //exiting the marketplace
+                    System.out.println("Thank you for visiting our Local Service Marketplace!");
+                    break;
+
+
+                default:
+                    System.out.println("Invalid Option.");
+                    break;
+            }
+        }
+        sc.close();
+    }
+}
